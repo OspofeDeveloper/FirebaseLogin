@@ -74,4 +74,25 @@ class AuthService @Inject constructor(
 
     }
 
+
+    /**
+     * Implementamos esta función para ser llamada desde el Splash Screen y que nos haga un control
+     * de si la sesión ya estaba iniciada y por lo tanto podemos ir directamente a la pantalla de
+     * detalle o si no tenemos la sesión inciada y tenemos que empezar en la pantalla de inicio de
+     * sesión.
+     *
+     * Usando firebaseAuth.currentUser este nos devuelve un firebaseUser, por lo que lo que podemos
+     * hacer es retornar firebaseUser != null de tal forma que:
+     *      - Si este se cumple (es true) -> el usuario ya está loggado
+     *      - Si este no se cumple (es false) -> el usuario no está loggado
+     *
+     * Pero como a veces necesitamos recuperar también el usuario lo que hacemos es crear una clase
+     * privada getCurrentUser que lo recupera, de tal forma que cualquier otro método de esta clase
+     * que lo necesite puede acceder a él a partir de esta función
+     */
+    fun isUserLogged(): Boolean {
+        return getCurrentUser() != null
+    }
+
+    private fun getCurrentUser() = firebaseAuth.currentUser
 }

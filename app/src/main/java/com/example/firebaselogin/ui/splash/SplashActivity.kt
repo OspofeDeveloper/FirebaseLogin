@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firebaselogin.databinding.ActivitySplashBinding
+import com.example.firebaselogin.ui.detail.DetailActivity
 import com.example.firebaselogin.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,7 +20,16 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        navigateToLogin()
+
+
+        when (splashViewModel.checkDestination()) {
+            SplashDestination.Home -> navigateToHome()
+            SplashDestination.Login -> navigateToLogin()
+        }
+    }
+
+    private fun navigateToHome() {
+        startActivity(Intent(this, DetailActivity::class.java))
     }
 
     private fun navigateToLogin() {
