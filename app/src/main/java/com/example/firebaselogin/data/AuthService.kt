@@ -1,10 +1,12 @@
 package com.example.firebaselogin.data
 
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class AuthService @Inject constructor(
     private val firebaseAuth: FirebaseAuth
@@ -29,10 +31,47 @@ class AuthService @Inject constructor(
      *
      * A parte de eso también tenemos listeners, por ejemplo:
      *  - return firebaseAuth.signInWithEmailAndPassword(email, password).await().addOnCancelledListener
-     * Esto sirva para saber si ha cancelado la cuenta. Hay muchos mas del estilo
+     * Esto sirva para saber si ha cancelado la cuenta. Hay muchos mas del estilo y son muy útiles para,
+     * por ejemplo, poner logs en cada uno de ellos y controlar que pasa en todo momento
      */
     suspend fun login(email: String, password: String): FirebaseUser? {
         return firebaseAuth.signInWithEmailAndPassword(email, password).await().user
+    }
+
+    /**
+     * En este caso las funcionalidades que hemos comentado en login son iguales en este caso.
+     *
+     * Lo que tambien vamos a ver es otra funcionalidad que nos proporciona en este caso
+     * suspendCancellableCoroutine, esta es una corrutina que nos permite gestionar en este caso
+     * nuestra lógica a través del listener. En este caso esta función no permite que nuestra
+     * corrutina termine hasta que se haga nuestro addOnSuccessListener y en caso de que el
+     * registro se haga bien guardamos el usuario que queremos devolver y continuamos la corrutina
+     * ya con ese valor obtenido.
+     *
+     * También es muy potente porque podemos usar varios listeners de la misma forma para que en
+     * cada caso dependiendo de que haya pasado y por lo tanto dentro de que listener vayamos podemos
+     * implementar una lógica u otra.
+     *
+     * Como en este caso si falla mandamos un excepción, en el código del viewmodel que lanzamos la
+     * corrutina podemos rodearlo de un bloque try/catch, lo que nos permite utilizar los mensajes
+     * de error que nos proporciona firebase y hacer una buena gestión de errores
+     *
+     * Esto en el caso de querer manejar nuestra lógica con los listeners es muy potente. Sino, lo
+     * hacemos con el await().user
+     */
+    suspend fun register(email: String, password: String): FirebaseUser? {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+                    val user = it.user
+                    cancellableContinuation.resume(user)
+                }
+                .addOnFailureListener {
+                    cancellableContinuation.resumeWithException(it)
+                }
+        }
+
+
     }
 
 }
