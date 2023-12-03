@@ -1,9 +1,13 @@
 package com.example.firebaselogin.data
 
+import android.app.Activity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -98,5 +102,70 @@ class AuthService @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    /**
+     * Para mandar la validación del usuario por SMS se llama a una clase que se llama phoneAuthProvider
+     * que es de firebase, y esa clase necesita un objeto "options" bastante complejo.
+     *
+     * Este objeto tiene:
+     *      - newBuilder que recibe nuestro firebaseAuth
+     *
+     *      - setPhoneNumber que es el numero al cual le enviaremos el SMS
+     *
+     *      - setTimeout -> Cuanto tiempo tiene que pasar para que le enviemos otro SMS en caso de que
+     *        no le llegue o pase alguna cosa, lo normal es 60 segundos
+     *
+     *      - setAvtivity -> Esto es la mas extraño, ya que es una mala práctica horrible porque me
+     *      está pidiendo que le pase una activity desde mi Activity o Fragment hasta la capa de data.
+     *      Es muy mala práctica pero es la única forma de hacerlo con Firebase.
+     *             - MAS INFO EN -> https://github.com/firebase/firebase-android-sdk/issues/2239
+     *
+     *      - callback -> Es una lista de funciones que van a ser llamadas dependiendo de la situación,
+     *      como por ejemplo: Si el SMS se manda, si hay algun error...
+     *      Este lo podriamos hacer añadiendo la implementación de esas funciones dentro de
+     *      .setCallbacks, pero siguiendo el principio de Single Responsability no lo haremos aqui,
+     *      ya que no es responsabilidad de authService, ya que la unica responsabilidad
+     *      de este es comunicarse con Firebase. Por lo tanto moveremos esa lógica al ViewModel.
+     *
+     * Ya por último enviamos nuesto objeto para que se encargue de toda la verificación y como él
+     * se encarga de todo, no hace falta ni devolver ningún valor y, por ende, no recojeremos ningún
+     * valor desde result en el viewModel
+     *
+     */
+    fun loginWithPhone(
+        phoneNumber: String,
+        activity: Activity,
+        callBack: PhoneAuthProvider.OnVerificationStateChangedCallbacks
+    ) {
+
+
+        val options = PhoneAuthOptions
+            .newBuilder(firebaseAuth)
+            .setPhoneNumber(phoneNumber)
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(activity)
+            .setCallbacks(callBack)
+            .build()
+
+        PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+
     private fun getCurrentUser() = firebaseAuth.currentUser
+
+    /**
+     * Para poder automatizar pruebas en el envio de SMS, ya que si ponemos nuestro número de telefono real y
+     * enviamos mas de uno 2 o 3 SMS en un periodo corto de tiempo firebase nos va a bloquear,
+     * haremos lo siguiente:
+     *      - Escribimos toda la instrucción indicando que si le llega el número que usemos para
+     *        las pruebas (en este caso +34 123456789), nos va a poner directamente el SMS de
+     *        validación, simulando que ya se ha hecho todo el flujo por detrás.
+     * De esta forma lo único que hacemos es simular que todo ha ido bien, pero no se envia ningún
+     * SMS al telefono ni nos crea ninguna cuenta en firebase, ya que no es mas que una simulación.
+     *
+     * Por lo tanto esto solamente es util para hacer pruebas o cuando estas en debug, pero no es
+     * la forma correcta de hacerlo.
+     *
+     * Código que lo hace -> firebaseAuth.firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber("+34 123456789", "123456")
+     */
+
+
 }

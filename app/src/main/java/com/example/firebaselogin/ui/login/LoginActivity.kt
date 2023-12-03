@@ -2,17 +2,19 @@ package com.example.firebaselogin.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.firebaselogin.databinding.ActivityLoginBinding
+import com.example.firebaselogin.databinding.DialogPhoneLoginBinding
 import com.example.firebaselogin.ui.detail.DetailActivity
 import com.example.firebaselogin.ui.signup.SignUpActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -45,15 +47,39 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.btnLogin.setOnClickListener{ loginViewModel.login(
-            user = binding.tieUser.text.toString(),
-            password = binding.tiePassword.text.toString()
-        ) { navigateToDetail() }
+        binding.btnLogin.setOnClickListener {
+            loginViewModel.login(
+                user = binding.tieUser.text.toString(),
+                password = binding.tiePassword.text.toString()
+            ) { navigateToDetail() }
         }
 
         binding.tvRegister.setOnClickListener {
             navigateToSignUp()
         }
+
+        binding.btnLoginPhone.setOnClickListener {
+            showPhoneLogin()
+        }
+    }
+
+    private fun showPhoneLogin() {
+        val phoneBinding = DialogPhoneLoginBinding.inflate(layoutInflater)
+        val alertDialog = AlertDialog.Builder(this).apply { setView(phoneBinding.root) }.create()
+
+        phoneBinding.btnPhone.setOnClickListener {
+            loginViewModel.loginWithPhone(phoneBinding.tiePhone.text.toString(), this,
+                onCodeSent = {},
+                onVerificationComplete = { navigateToDetail() },
+                onVerificationFailed = { showToast("An error occurred: $it") }
+            )
+        }
+
+        alertDialog.show()
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToSignUp() {

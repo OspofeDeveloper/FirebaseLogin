@@ -7,11 +7,11 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\Oscar Pozo Fernandez\.android\avd\RealTimeChat_Device.avd" />
+            <value value="C:\Users\Oscar Pozo Fernandez\.android\avd\TicTacToe_Device.avd" />
           </Key>
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-12-02T20:08:41.646648100Z" />
+    <timeTargetWasSelectedWithDropDown value="2023-12-03T12:28:48.738789700Z" />
   </component>
 </project>
