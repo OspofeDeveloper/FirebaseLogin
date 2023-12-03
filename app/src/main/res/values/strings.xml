@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FirebaseLogin</string>
+    <string name="default_web_client_id" translatable="false">711033246226-is1il3ga09hodppgp2r13p6vqria0tdi.apps.googleusercontent.com</string>
 </resources>

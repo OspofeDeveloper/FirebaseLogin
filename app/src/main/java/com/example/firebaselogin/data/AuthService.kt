@@ -1,11 +1,19 @@
 package com.example.firebaselogin.data
 
 import android.app.Activity
+import android.content.Context
+import com.example.firebaselogin.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
@@ -14,7 +22,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AuthService @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    @ApplicationContext private val context: Context
 ) {
 
     /**
@@ -163,17 +172,51 @@ class AuthService @Inject constructor(
      */
     suspend fun verifyCode(verificationCode: String, phoneCode: String): FirebaseUser? {
         val credentials = PhoneAuthProvider.getCredential(verificationCode, phoneCode)
-        return completeRegisterWithPhone(credentials)
+        return completeRegisterWithCredentials(credentials)
 
     }
+
+    /**
+     * Creamos un GoogleSignInOptions:
+     *      - Para el token le pasamos el string default_web_client_id, pero no lo tenemos creado.
+     *        Probamos a darle al martillo una vez tengamos puesto todo hasta .build() y puede
+     *        ser que se nos cree de forma automática el string en strings.xml.
+     *        Si no es el caso, tenemos que ir a nuestro authentication, clicar sobre el proveedor
+     *        Google -> Configuración del SDK web -> ID de cliente web -> copiamos ese valor y lo
+     *        metemos en nuestro fichero strings.xml
+     *
+     *        - Devolvemos un Cliente de Google
+     */
+    fun getGoogleClient(): GoogleSignInClient {
+        val gso = GoogleSignInOptions
+            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id)).requestEmail()
+            .build()
+
+        return GoogleSignIn.getClient(context, gso)
+    }
+
+    /**
+     * Aqui es donde obtenemos las credenciales de verdad, es decir, este nos devuelve el AuthCredential
+     * a partir del idToken.
+     *
+     * Este nos devuelve un AuthCredential al igual que hacia la función verifyCode, por lo tanto para
+     * recuperar el usuario que queremos a partir de estas credenciales podemos reutilizar el método
+     * completeRegisterWithCredentials
+     */
+    suspend fun loginWithGoogle(idToken: String): FirebaseUser? {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        return completeRegisterWithCredentials(credential)
+    }
+
 
     /**
      * En este caso hacemos lo mismo que en register, usamos suspendCancellableCoroutine pero esta vez
      * hacemos sign In con las credenciales que es lo que le pasamos a nuestro método y devolvemos el
      * usuario que se crea con estas credenciales.
      */
-    suspend fun completeRegisterWithPhone(
-        credential: PhoneAuthCredential
+    private suspend fun completeRegisterWithCredentials(
+        credential: AuthCredential
     ): FirebaseUser? {
         return suspendCancellableCoroutine { cancellableContinuation ->
             firebaseAuth.signInWithCredential(credential).addOnSuccessListener {
@@ -185,7 +228,12 @@ class AuthService @Inject constructor(
         }
     }
 
+    suspend fun completeRegisterWithPhoneVerification(p0: PhoneAuthCredential) =
+        completeRegisterWithCredentials(p0)
+
+
     private fun getCurrentUser() = firebaseAuth.currentUser
+
 
     /**
      * Para poder automatizar pruebas en el envio de SMS, ya que si ponemos nuestro número de telefono real y

@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaselogin.data.AuthService
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
@@ -90,7 +91,13 @@ class LoginViewModel @Inject constructor(
                 override fun onVerificationCompleted(p0: PhoneAuthCredential) {
                     viewModelScope.launch {
                         val result = withContext(Dispatchers.IO) {
-                            authService.completeRegisterWithPhone(p0)
+
+                            /**
+                             * Para mantener la función completeRegisterWithCredentials privada dentro
+                             * de authService, creamos una función pública cuya función sea simplemente
+                             * llamar a dicha función privada para mantener el codigo mas limpio
+                             */
+                            authService.completeRegisterWithPhoneVerification(p0)
                         }
 
                         if (result != null) {
@@ -148,6 +155,36 @@ class LoginViewModel @Inject constructor(
 
             if (result != null) {
                 onSuccessVerification()
+            }
+        }
+    }
+
+    /**
+     * Authservice nos devuelve un GoogleSignInClient y a través de una función lambda le enviamos
+     * ese gsc a nuestra Activity
+     */
+    fun onGoogleLoginSelected(googleLauncherLogin: (GoogleSignInClient) -> Unit) {
+        val gsc = authService.getGoogleClient()
+        googleLauncherLogin(gsc)
+    }
+
+    /**
+     * Este método va a ser el que va a hacer el login y el registro real a firebase. Va ser un
+     * poco como el método verifyCode(), aqui le vamos a pasar solamente el idToken, ya que todo
+     * el registro con Google ya lo hemos hecho antes en el View con el launcher y ahora solamente
+     * nos queda unirlo y sincronizarlo con firebase.
+     *
+     * Ahora solo le decimos a firebase si con ese token puede inciar sesión, y firebase ya se
+     * encarga de to_do, que para eso usamos firebase
+     */
+    fun loginWithGoogle(idToken: String, navigateToDetail: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.loginWithGoogle(idToken)
+            }
+
+            if (result != null) {
+                navigateToDetail()
             }
         }
     }

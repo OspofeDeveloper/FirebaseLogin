@@ -49,10 +49,13 @@ dependencies {
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
+    /** Para el loggin con cuenta de google */
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     //Dagger-Hilt
     implementation("com.google.dagger:hilt-android:$daggerHiltVersion")
     kapt("com.google.dagger:hilt-compiler:$daggerHiltVersion")
+
 
     //Pinview (Verification SMS View) -> https://github.com/ChaosLeung/PinView
     implementation("io.github.chaosleung:pinview:1.4.4")
