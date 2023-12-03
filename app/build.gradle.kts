@@ -54,6 +54,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:$daggerHiltVersion")
     kapt("com.google.dagger:hilt-compiler:$daggerHiltVersion")
 
+    //Pinview (Verification SMS View) -> https://github.com/ChaosLeung/PinView
+    implementation("io.github.chaosleung:pinview:1.4.4")
+
     implementation("androidx.activity:activity-ktx:1.8.1")
 
     implementation("androidx.core:core-ktx:1.9.0")

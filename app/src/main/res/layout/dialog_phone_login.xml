@@ -2,6 +2,7 @@
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -19,6 +20,19 @@
             android:layout_height="wrap_content"/>
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.chaos.view.PinView
+        android:id="@+id/pinView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/PinWidget.PinView"
+        android:visibility="gone"
+        android:cursorVisible="true"
+        android:inputType="number"
+        android:itemBackground="@color/white"
+        app:hideLineWhenFilled="false"
+        app:itemCount="6"
+        app:itemRadius="10dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnPhone"

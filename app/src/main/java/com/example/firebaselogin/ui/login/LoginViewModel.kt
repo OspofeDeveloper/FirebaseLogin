@@ -23,6 +23,8 @@ class LoginViewModel @Inject constructor(
     private var _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    lateinit var verificationCode: String
+
 
     fun login(user: String, password: String, navigateToDetail: () -> Unit) {
         viewModelScope.launch {
@@ -43,6 +45,11 @@ class LoginViewModel @Inject constructor(
 
     }
 
+    /**
+     * A diferencia de lo que hicimos con el primer logIn con email, aqui no hace falta que gestionemos
+     * nada del logout o de controlar si el usuario ya está con la sesión inciada ni nada, ya que con
+     * lo que implementamos en ese caso ya nos funciona con este tipo de login también
+     */
     fun loginWithPhone(
         phoneNumber: String,
         activity: Activity,
@@ -67,12 +74,30 @@ class LoginViewModel @Inject constructor(
                  * último paso, que seria navegar a Detail.
                  *
                  * En resumen esto es en el caso que no haga falta hacer todo el rollo completo de
-                 * la verificación porque el móbil ya es fiable. En ese caso simplemente navegamos
-                 * a la siguiente pantalla.
+                 * la verificación porque el móbil ya es fiable. En ese caso simplemente se llama a
+                 * este método.
+                 *
+                 * Como se ha mencionado aqui teniamos solamente el navegar a Detail, pero como este
+                 * método se llama cuando supuestamente ya se ha verificado el código y se salta todos
+                 * los pasos intermedios de enviar un código de verificación y verificar que el código
+                 * que introduce el usuario es el correcto, si solamente navegamos a Detail no estamos
+                 * creando ninguna cuenta al usuario que se está loggando.
+                 * Esto quiere decir que en vez de solo navegar a Detail primero tenemos que crear la
+                 * cuenta y registrarlo a través de llamar a la funcion completeRegisterWithPhone()
+                 * de nuestro authService, pero esta vez pasandole p0 que son unas credenciales que
+                 * nos proporciona de forma directa firebase
                  */
                 override fun onVerificationCompleted(p0: PhoneAuthCredential) {
-                    //navigateToDetail()
-                    onVerificationComplete()
+                    viewModelScope.launch {
+                        val result = withContext(Dispatchers.IO) {
+                            authService.completeRegisterWithPhone(p0)
+                        }
+
+                        if (result != null) {
+                            onVerificationComplete()
+                        }
+                    }
+
                 }
 
                 /** Se llama cuando hay algun error como que no llega el SMS */
@@ -84,12 +109,18 @@ class LoginViewModel @Inject constructor(
 
                 /** Se llama cuando desde firebase se haya mandado el SMS al móbil, de tal forma
                  *  que podemos controlarlo para hacer que el usuario del móbil pueda meter el
-                 *  código, por ejemplo
+                 *  código, por ejemplo.
+                 *
+                 *  Como para la verificación (verifyCode()) necesitaremos el código de verificación
+                 *  p0, guardamos ese valor en una variable local verificationCode. En este caso como
+                 *  este onCodeSent está dentro de una corrutina no podemos acceder a esa variable
+                 *  simplemente haciendo this.verificationCode, en caso de querer llamarla dentro
+                 *  de una corutina haremos this@LoginViewModel.verificationCode = p0
                  */
                 override fun onCodeSent(p0: String, p1: PhoneAuthProvider.ForceResendingToken) {
+                    this@LoginViewModel.verificationCode = p0
                     _isLoading.value = false
-
-                    onCodeSent
+                    onCodeSent()
                 }
 
             }
@@ -99,6 +130,25 @@ class LoginViewModel @Inject constructor(
             }
 
             _isLoading.value = false
+        }
+    }
+
+
+    /**
+     * Para la función verifyCode necesitamos 2 cosas:
+     *      - verificationCode -> Es el código p0 que nos devuelve la función onCodeSent del
+     *                            callback para que verifiquemos
+     *      - phoneCode -> Código que introduce el usuario para verificar
+     */
+    fun verifyCode(phoneCode: String, onSuccessVerification: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.verifyCode(verificationCode, phoneCode)
+            }
+
+            if (result != null) {
+                onSuccessVerification()
+            }
         }
     }
 

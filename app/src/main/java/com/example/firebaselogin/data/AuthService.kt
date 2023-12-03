@@ -3,6 +3,7 @@ package com.example.firebaselogin.data
 import android.app.Activity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -147,6 +148,41 @@ class AuthService @Inject constructor(
             .build()
 
         PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+
+    /**
+     * Ahora recuperamos las credenciales. Una vez las tenemos, miramos que si se ha introducido el
+     * código de verificación correcto y si ha sido correcto, con el método completeRegisterWithPhone
+     * crearemos la cuenta a ese usuario.
+     *
+     * Por esa razón cuando haciamos:
+     *      - firebaseAuth.firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber("+34 123456789", "123456")
+     * Estabamos pasando directamente a la función sobreescrita del callback "onVerificationCompleted()"
+     * en la cual simplemente navegabamos hacia DetailScreen, por lo tanto nos saltábamos todos los
+     * pasos relacionados con la creación de la cuenta
+     */
+    suspend fun verifyCode(verificationCode: String, phoneCode: String): FirebaseUser? {
+        val credentials = PhoneAuthProvider.getCredential(verificationCode, phoneCode)
+        return completeRegisterWithPhone(credentials)
+
+    }
+
+    /**
+     * En este caso hacemos lo mismo que en register, usamos suspendCancellableCoroutine pero esta vez
+     * hacemos sign In con las credenciales que es lo que le pasamos a nuestro método y devolvemos el
+     * usuario que se crea con estas credenciales.
+     */
+    suspend fun completeRegisterWithPhone(
+        credential: PhoneAuthCredential
+    ): FirebaseUser? {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            firebaseAuth.signInWithCredential(credential).addOnSuccessListener {
+                cancellableContinuation.resume(it.user)
+            }
+                .addOnFailureListener {
+                    cancellableContinuation.resumeWithException(it)
+                }
+        }
     }
 
     private fun getCurrentUser() = firebaseAuth.currentUser

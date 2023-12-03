@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -69,10 +70,22 @@ class LoginActivity : AppCompatActivity() {
 
         phoneBinding.btnPhone.setOnClickListener {
             loginViewModel.loginWithPhone(phoneBinding.tiePhone.text.toString(), this,
-                onCodeSent = {},
+                onCodeSent = {
+                    phoneBinding.pinView.isVisible = true
+                },
                 onVerificationComplete = { navigateToDetail() },
                 onVerificationFailed = { showToast("An error occurred: $it") }
             )
+        }
+
+        /**
+         * Una vez introducimos el codigo de verificación completo del SMS llamamos a la función
+         * verifyCode
+         */
+        phoneBinding.pinView.doOnTextChanged { text, _, _, _ ->
+            if (text?.length == 6) {
+                loginViewModel.verifyCode(text.toString()) { navigateToDetail() }
+            }
         }
 
         alertDialog.show()
