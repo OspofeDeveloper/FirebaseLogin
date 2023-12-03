@@ -94,5 +94,9 @@ class AuthService @Inject constructor(
         return getCurrentUser() != null
     }
 
+    fun logout() {
+        firebaseAuth.signOut()
+    }
+
     private fun getCurrentUser() = firebaseAuth.currentUser
 }
