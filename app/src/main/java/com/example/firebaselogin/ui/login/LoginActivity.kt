@@ -1,7 +1,9 @@
 package com.example.firebaselogin.ui.login
 
 import android.content.Intent
+import android.inputmethodservice.InputMethodService
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -71,7 +73,21 @@ class LoginActivity : AppCompatActivity() {
         phoneBinding.btnPhone.setOnClickListener {
             loginViewModel.loginWithPhone(phoneBinding.tiePhone.text.toString(), this,
                 onCodeSent = {
+                    /** Una vez se envia el código de verificación no puede modificar el num de telefono */
+                    phoneBinding.tiePhone.isEnabled = false
+                    phoneBinding.btnPhone.isEnabled = false
+
                     phoneBinding.pinView.isVisible = true
+
+                    /**
+                     * Con esto lo que hacemos es que cuando se mande el código de forma automática
+                     * el cursor del usuario se ponga encima de donde tenemos que escribir el código
+                     * de verificación, de tal forma que el usuario no tiene que clicar encima de
+                     * esa celda para escribirlo.
+                     */
+                    phoneBinding.pinView.requestFocus()
+                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(phoneBinding.pinView, InputMethodManager.SHOW_IMPLICIT)
                 },
                 onVerificationComplete = { navigateToDetail() },
                 onVerificationFailed = { showToast("An error occurred: $it") }
