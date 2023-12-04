@@ -2,6 +2,7 @@ package com.example.firebaselogin.ui.signup
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -46,12 +47,18 @@ class SignUpActivity : AppCompatActivity() {
         binding.btnSignUp.setOnClickListener {
             signUpViewModel.register(
                 email = binding.tieUser.text.toString(),
-                password = binding.tiePassword.text.toString()
-            ) { navigateToDetail() }
+                password = binding.tiePassword.text.toString(),
+                navigateToDetail = { navigateToDetail() },
+                showToast = { showToast(it) }
+            )
         }
     }
 
     private fun navigateToDetail() {
         startActivity(Intent(this, DetailActivity::class.java))
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(this, message ?: "An error ocurred, try again later", Toast.LENGTH_SHORT).show()
     }
 }

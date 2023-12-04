@@ -20,7 +20,12 @@ class SignUpViewModel @Inject constructor(
     private var _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    fun register(email: String, password: String, navigateToDetail: () -> Unit) {
+    fun register(
+        email: String,
+        password: String,
+        navigateToDetail: () -> Unit,
+        showToast: (String?) -> Unit
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
 
@@ -30,12 +35,13 @@ class SignUpViewModel @Inject constructor(
                 }
                 if (result != null) {
                     navigateToDetail()
-                }else{
+                } else {
                     //error
                     Log.i("ospofe", "error register")
                 }
             } catch (e: Exception) {
                 //error
+                showToast(e.message)
                 Log.i("ospofe", e.message.orEmpty())
             }
 
