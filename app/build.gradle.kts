@@ -51,6 +51,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     /** Para el loggin con cuenta de google */
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+    /** Para el loggin con cuenta de facebook */
+    implementation("com.facebook.android:facebook-login:16.2.0")
 
     //Dagger-Hilt
     implementation("com.google.dagger:hilt-android:$daggerHiltVersion")

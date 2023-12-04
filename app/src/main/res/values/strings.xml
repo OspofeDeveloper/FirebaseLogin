@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">FirebaseLogin</string>
+
+    <!-- Login de Google -->
     <string name="default_web_client_id" translatable="false">711033246226-is1il3ga09hodppgp2r13p6vqria0tdi.apps.googleusercontent.com</string>
+
+    <!-- Login de Facebook -->
+    <string name="facebook_app_id">2053790741621053</string>
+    <string name="fb_login_protocol_scheme">fb2053790741621053</string>
+    <string name="facebook_client_token">fe384cd304046c742e014a6895979727</string>
 </resources>

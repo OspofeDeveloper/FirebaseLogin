@@ -4,11 +4,15 @@ import android.app.Activity
 import android.content.Context
 import android.provider.ContactsContract.CommonDataKinds.Identity
 import com.example.firebaselogin.R
+import com.facebook.AccessToken
+import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FacebookAuthCredential
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -113,8 +117,9 @@ class AuthService @Inject constructor(
         return getCurrentUser() != null
     }
 
-    suspend fun logout() {
+    fun logout() {
         firebaseAuth.signOut()
+        LoginManager.getInstance().logOut()
     }
 
     /**
@@ -234,8 +239,13 @@ class AuthService @Inject constructor(
     suspend fun completeRegisterWithPhoneVerification(p0: PhoneAuthCredential) =
         completeRegisterWithCredentials(p0)
 
+    suspend fun loginWithFacebook(accessToken: AccessToken): FirebaseUser? {
+        val credentials = FacebookAuthProvider.getCredential(accessToken.token)
+        return completeRegisterWithCredentials(credentials)
+    }
 
     private fun getCurrentUser() = firebaseAuth.currentUser
+
 
 
     /**

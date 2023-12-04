@@ -15,11 +15,14 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.firebaselogin.databinding.ActivityDetailBinding
 import com.example.firebaselogin.databinding.ActivityLoginBinding
 import com.example.firebaselogin.databinding.DialogPhoneLoginBinding
 import com.example.firebaselogin.ui.detail.DetailActivity
 import com.example.firebaselogin.ui.signup.SignUpActivity
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var callbackManager: CallbackManager
 
     /** Mirar exactamente como funciona esto
      *
@@ -125,6 +129,28 @@ class LoginActivity : AppCompatActivity() {
                 googleLauncher.launch(gsc.signInIntent)
             }
         }
+
+        //Facebook
+
+        callbackManager = CallbackManager.Factory.create()
+        binding.btnLoginFacebook.setPermissions("email", "public_profile")
+        binding.btnLoginFacebook.registerCallback(callbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onCancel() {
+                    showToast("Facebook login cancelled")
+                }
+
+                override fun onError(error: FacebookException) {
+                    showToast("An error occurred: ${error.message}")
+                }
+
+                override fun onSuccess(result: LoginResult) {
+                    loginViewModel.loginWithFacebook(result.accessToken) { navigateToDetail() }
+                }
+
+            })
+
+        //Facebook end
     }
 
     private fun showPhoneLogin() {

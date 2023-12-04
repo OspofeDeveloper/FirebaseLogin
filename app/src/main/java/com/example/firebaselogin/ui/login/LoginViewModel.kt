@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaselogin.data.AuthService
+import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
@@ -181,6 +182,18 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 authService.loginWithGoogle(idToken)
+            }
+
+            if (result != null) {
+                navigateToDetail()
+            }
+        }
+    }
+
+    fun loginWithFacebook(accessToken: AccessToken, navigateToDetail: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.loginWithFacebook(accessToken)
             }
 
             if (result != null) {
