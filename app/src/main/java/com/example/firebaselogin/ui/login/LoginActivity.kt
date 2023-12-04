@@ -15,6 +15,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.firebaselogin.databinding.ActivityDetailBinding
 import com.example.firebaselogin.databinding.ActivityLoginBinding
 import com.example.firebaselogin.databinding.DialogPhoneLoginBinding
 import com.example.firebaselogin.ui.detail.DetailActivity
@@ -56,6 +57,7 @@ class LoginActivity : AppCompatActivity() {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)!!
+
                     loginViewModel.loginWithGoogle(account.idToken!!) {
                         navigateToDetail()
                     }
@@ -112,10 +114,14 @@ class LoginActivity : AppCompatActivity() {
          * To_do eso se hace a través de un launcher, pero un launcher necesita las credenciales, es
          * decir, el GoogleSignInClient para saber que mostrar y como configurarlo.
          *
-         * Entonces creamos arriba de la activity un private val googleLauncher
+         * Entonces creamos arriba de la activity un private val googleLauncher.
+         *
+         * Hacemos signOut cada vez que vayamos a logearnos con una cuenta de google, de tal forma que
+         * Si tenemos mas de una cuenta podemos iniciar con otra
          */
         binding.btnLoginGoogle.setOnClickListener {
             loginViewModel.onGoogleLoginSelected { gsc ->
+                gsc.signOut()
                 googleLauncher.launch(gsc.signInIntent)
             }
         }

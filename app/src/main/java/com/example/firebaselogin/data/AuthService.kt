@@ -2,10 +2,12 @@ package com.example.firebaselogin.data
 
 import android.app.Activity
 import android.content.Context
+import android.provider.ContactsContract.CommonDataKinds.Identity
 import com.example.firebaselogin.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -13,6 +15,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.auth
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
@@ -25,6 +28,8 @@ class AuthService @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     @ApplicationContext private val context: Context
 ) {
+
+    private lateinit var googleClient: GoogleSignInClient
 
     /**
      * Lo que devuelve esta función es un Task, que viene a ser como un deferred en corrutinas, es
@@ -108,7 +113,7 @@ class AuthService @Inject constructor(
         return getCurrentUser() != null
     }
 
-    fun logout() {
+    suspend fun logout() {
         firebaseAuth.signOut()
     }
 
@@ -146,8 +151,6 @@ class AuthService @Inject constructor(
         activity: Activity,
         callBack: PhoneAuthProvider.OnVerificationStateChangedCallbacks
     ) {
-
-
         val options = PhoneAuthOptions
             .newBuilder(firebaseAuth)
             .setPhoneNumber(phoneNumber)
