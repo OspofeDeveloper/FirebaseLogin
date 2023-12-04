@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.firebaselogin.R
 import com.example.firebaselogin.databinding.ActivityLoginBinding
 import com.example.firebaselogin.databinding.DialogPhoneLoginBinding
 import com.example.firebaselogin.ui.detail.DetailActivity
@@ -34,6 +36,8 @@ class LoginActivity : AppCompatActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var binding: ActivityLoginBinding
     private lateinit var callbackManager: CallbackManager
+
+
 
     /** Mirar exactamente como funciona esto
      *
@@ -129,6 +133,19 @@ class LoginActivity : AppCompatActivity() {
                 googleLauncher.launch(gsc.signInIntent)
             }
         }
+
+        binding.btnLoginGithub.setOnClickListener {
+            loginViewModel.onGithubLoginSelected(this) { navigateToDetail() }
+        }
+
+        binding.btnLoginMicrosoft.setOnClickListener {
+            loginViewModel.onMicrosoftLoginSelected(this) { navigateToDetail() }
+        }
+
+        binding.btnLoginTwitter.setOnClickListener {
+            loginViewModel.onTwitterLoginSelected(this) { navigateToDetail() }
+        }
+
 
         //Facebook
 

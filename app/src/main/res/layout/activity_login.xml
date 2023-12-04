@@ -76,40 +76,77 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLoginPhone"
-        android:layout_height="wrap_content"
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:text="Login with Phone"
-        android:backgroundTint="@color/black"
-        app:icon="@drawable/ic_phone"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/btnLogin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLoginGoogle"
-        android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:text="Login with Google"
-        android:backgroundTint="@color/black"
-        app:icon="@drawable/ic_google"
-        app:layout_constraintTop_toBottomOf="@+id/btnLoginPhone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/btnLoginFacebook"
-        android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:text="Login with Google"
-        app:icon="@drawable/ic_google"
-        app:layout_constraintTop_toBottomOf="@+id/btnLoginGoogle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLoginPhone"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Phone"
+                android:backgroundTint="@color/black"
+                app:icon="@drawable/ic_phone"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLoginGoogle"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Google"
+                android:backgroundTint="@color/black"
+                app:icon="@drawable/ic_google"/>
+
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/btnLoginFacebook"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Google"
+                app:icon="@drawable/ic_google" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLoginGithub"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Github"
+                android:backgroundTint="@color/black"
+                app:icon="@drawable/ic_github"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLoginMicrosoft"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Microsoft"
+                android:backgroundTint="@color/black"
+                app:icon="@drawable/ic_microsoft"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLoginTwitter"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:text="Login with Twitter"
+                android:backgroundTint="@color/black"
+                app:icon="@drawable/ic_twitter"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
 
     <ProgressBar
         android:id="@+id/pbLoading"

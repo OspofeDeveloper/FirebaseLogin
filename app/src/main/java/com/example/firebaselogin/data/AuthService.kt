@@ -2,25 +2,24 @@ package com.example.firebaselogin.data
 
 import android.app.Activity
 import android.content.Context
-import android.provider.ContactsContract.CommonDataKinds.Identity
+import android.util.Log
 import com.example.firebaselogin.R
 import com.facebook.AccessToken
 import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FacebookAuthCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.auth.auth
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
@@ -32,8 +31,6 @@ class AuthService @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     @ApplicationContext private val context: Context
 ) {
-
-    private lateinit var googleClient: GoogleSignInClient
 
     /**
      * Lo que devuelve esta función es un Task, que viene a ser como un deferred en corrutinas, es
@@ -231,6 +228,7 @@ class AuthService @Inject constructor(
                 cancellableContinuation.resume(it.user)
             }
                 .addOnFailureListener {
+                    Log.i("ospofe", "Error: $it")
                     cancellableContinuation.resumeWithException(it)
                 }
         }
@@ -244,8 +242,75 @@ class AuthService @Inject constructor(
         return completeRegisterWithCredentials(credentials)
     }
 
-    private fun getCurrentUser() = firebaseAuth.currentUser
+    suspend fun loginWithGithub(activity: Activity): FirebaseUser? {
+        val provider = OAuthProvider.newBuilder("github.com").apply {
+            scopes = listOf("user:email")
+        }.build()
 
+        /**
+         * Con el pendingAuthResult vigilamos que no se esté llevando a cabo ningún otro login
+         * y que nos pueda dar problemas, por eso añadimos tanto el SuccessListener como el
+         * FailureListener.
+         *
+         * Eso es muy útil cuando hay cosas pendientes pero en el caso de que no haya nada pendiente
+         * tenemos que meter una opción mas, indicando que si no es el caso de que haya algo
+         * pendiente.
+         *
+         * En ese caso creamos una función que nos complete el registro pero esta vez con
+         * provider, parecido a lo que teniamos con completeRegisterWithPhoneVerification y
+         * completeRegisterWithCredentials. En este caso le pasamos:
+         *      - actvivity
+         *      - provider -> El provider ya montado
+         *      - cancellableContinuation -> Le pasamos la cancellableContinuation para que todo se
+         *        haga dentro de la misma corrutina y en un único flujo
+         */
+        return initRegisterWithProvider(activity, provider)
+    }
+
+    /**
+     * Para conseguir el email necesitamos meter también el calendars en el scope
+     */
+    suspend fun loginWithMicrosoft(activity: Activity): FirebaseUser? {
+        val provider = OAuthProvider.newBuilder("microsoft.com").apply {
+            scopes = listOf("mail.read", "calendars.read")
+        }.build()
+
+        return initRegisterWithProvider(activity, provider)
+    }
+
+    suspend fun loginWithTwitter(activity: Activity): FirebaseUser? {
+        val provider = OAuthProvider.newBuilder("twitter.com").build()
+        return initRegisterWithProvider(activity, provider)
+    }
+
+
+    private suspend fun initRegisterWithProvider(
+        activity: Activity,
+        provider: OAuthProvider
+    ): FirebaseUser? {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            firebaseAuth.pendingAuthResult?.addOnSuccessListener {
+                cancellableContinuation.resume(it.user)
+            }?.addOnFailureListener {
+                cancellableContinuation.resumeWithException(it)
+            } ?: completeRegisterWithProvider(activity, provider, cancellableContinuation)
+        }
+    }
+
+    private fun completeRegisterWithProvider(
+        activity: Activity,
+        provider: OAuthProvider,
+        cancellableContinuation: CancellableContinuation<FirebaseUser?>
+    ) {
+        firebaseAuth.startActivityForSignInWithProvider(activity, provider).addOnSuccessListener {
+            cancellableContinuation.resume(it.user)
+        }.addOnFailureListener {
+            cancellableContinuation.resumeWithException(it)
+        }
+    }
+
+
+    private fun getCurrentUser() = firebaseAuth.currentUser
 
 
     /**
@@ -263,6 +328,4 @@ class AuthService @Inject constructor(
      *
      * Código que lo hace -> firebaseAuth.firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber("+34 123456789", "123456")
      */
-
-
 }

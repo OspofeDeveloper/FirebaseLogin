@@ -202,4 +202,40 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onGithubLoginSelected(activity: Activity, navigateToDetail: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.loginWithGithub(activity)
+            }
+
+            if (result != null) {
+                navigateToDetail()
+            }
+        }
+    }
+
+    fun onMicrosoftLoginSelected(activity: Activity, navigateToDetail: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.loginWithMicrosoft(activity)
+            }
+
+            if (result != null) {
+                navigateToDetail()
+            }
+        }
+    }
+
+    fun onTwitterLoginSelected(activity: Activity, navigateToDetail: () -> Unit) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                authService.loginWithTwitter(activity)
+            }
+
+            if (result != null) {
+                navigateToDetail()
+            }
+        }
+    }
+
 }

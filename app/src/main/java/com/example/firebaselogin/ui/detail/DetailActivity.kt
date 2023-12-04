@@ -6,6 +6,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firebaselogin.databinding.ActivityDetailBinding
 import com.example.firebaselogin.ui.login.LoginActivity
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
