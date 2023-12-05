@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
-import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,14 +15,15 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.firebaselogin.R
 import com.example.firebaselogin.databinding.ActivityLoginBinding
 import com.example.firebaselogin.databinding.DialogPhoneLoginBinding
 import com.example.firebaselogin.ui.detail.DetailActivity
+import com.example.firebaselogin.ui.login.OathLogin.*
 import com.example.firebaselogin.ui.signup.SignUpActivity
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
+import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -36,7 +36,6 @@ class LoginActivity : AppCompatActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var binding: ActivityLoginBinding
     private lateinit var callbackManager: CallbackManager
-
 
 
     /** Mirar exactamente como funciona esto
@@ -135,23 +134,26 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnLoginGithub.setOnClickListener {
-            loginViewModel.onGithubLoginSelected(this) { navigateToDetail() }
+            loginViewModel.onOathLoginSelected(Github, this) { navigateToDetail() }
         }
 
-        binding.btnLoginMicrosoft.setOnClickListener {
-            loginViewModel.onMicrosoftLoginSelected(this) { navigateToDetail() }
+        binding.btnLoginGithub.setOnClickListener {
+            loginViewModel.onOathLoginSelected(Microsoft, this) { navigateToDetail() }
         }
 
-        binding.btnLoginTwitter.setOnClickListener {
-            loginViewModel.onTwitterLoginSelected(this) { navigateToDetail() }
+        binding.btnLoginGithub.setOnClickListener {
+            loginViewModel.onOathLoginSelected(Twitter, this) { navigateToDetail() }
         }
 
+        binding.btnLoginGithub.setOnClickListener {
+            loginViewModel.onOathLoginSelected(Yahoo, this) { navigateToDetail() }
+        }
 
         //Facebook
-
         callbackManager = CallbackManager.Factory.create()
-        binding.btnLoginFacebook.setPermissions("email", "public_profile")
-        binding.btnLoginFacebook.registerCallback(callbackManager,
+
+        //Con botón modificado
+        LoginManager.getInstance().registerCallback(callbackManager,
             object : FacebookCallback<LoginResult> {
                 override fun onCancel() {
                     showToast("Facebook login cancelled")
@@ -166,6 +168,28 @@ class LoginActivity : AppCompatActivity() {
                 }
 
             })
+
+        binding.btnLoginFacebook.setOnClickListener {
+            LoginManager.getInstance().logInWithReadPermissions(this, callbackManager, listOf("email", "public_profile"))
+        }
+
+        //Con botón por defecto
+        /*binding.btnLoginFacebook.setPermissions("email", "public_profile")
+            binding.btnLoginFacebook.registerCallback(callbackManager,
+                object : FacebookCallback<LoginResult> {
+                    override fun onCancel() {
+                        showToast("Facebook login cancelled")
+                    }
+
+                    override fun onError(error: FacebookException) {
+                        showToast("An error occurred: ${error.message}")
+                    }
+
+                    override fun onSuccess(result: LoginResult) {
+                        loginViewModel.loginWithFacebook(result.accessToken) { navigateToDetail() }
+                    }
+
+                })*/
 
         //Facebook end
     }
