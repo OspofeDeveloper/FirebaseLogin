@@ -137,15 +137,15 @@ class LoginActivity : AppCompatActivity() {
             loginViewModel.onOathLoginSelected(Github, this) { navigateToDetail() }
         }
 
-        binding.btnLoginGithub.setOnClickListener {
+        binding.btnLoginMicrosoft.setOnClickListener {
             loginViewModel.onOathLoginSelected(Microsoft, this) { navigateToDetail() }
         }
 
-        binding.btnLoginGithub.setOnClickListener {
+        binding.btnLoginTwitter.setOnClickListener {
             loginViewModel.onOathLoginSelected(Twitter, this) { navigateToDetail() }
         }
 
-        binding.btnLoginGithub.setOnClickListener {
+        binding.btnLoginYahoo.setOnClickListener {
             loginViewModel.onOathLoginSelected(Yahoo, this) { navigateToDetail() }
         }
 

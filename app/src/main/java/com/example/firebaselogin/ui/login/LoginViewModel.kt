@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firebaselogin.data.AuthService
+import com.example.firebaselogin.ui.login.OathLogin.*
 import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.FirebaseException
@@ -206,10 +207,10 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 when(oath) {
-                    OathLogin.Github -> authService.loginWithGithub(activity)
-                    OathLogin.Microsoft -> authService.loginWithMicrosoft(activity)
-                    OathLogin.Twitter -> authService.loginWithTwitter(activity)
-                    OathLogin.Yahoo -> authService.loginWithYahoo(activity)
+                    Github -> authService.loginWithGithub(activity)
+                    Microsoft -> authService.loginWithMicrosoft(activity)
+                    Twitter -> authService.loginWithTwitter(activity)
+                    Yahoo -> authService.loginWithYahoo(activity)
                 }
             }
 
